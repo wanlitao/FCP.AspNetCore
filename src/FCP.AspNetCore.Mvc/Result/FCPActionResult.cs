@@ -9,17 +9,20 @@ namespace Microsoft.AspNetCore.Mvc
         public FCPActionResult(FCPDoResult<TResultData> doResult)
         {
             DoResult = doResult ?? throw new ArgumentNullException(nameof(doResult));
-
-            Result = doResult.ToActionResult();
         }
 
         public FCPDoResult<TResultData> DoResult { get; }
 
-        public ActionResult Result { get; }
-
-        public Task ExecuteResultAsync(ActionContext context)
+        protected virtual IActionResult FormatActionResult(ActionContext context)
         {
-            return Result.ExecuteResultAsync(context);
+            return DoResult.ToActionResult();
+        }
+
+        public virtual Task ExecuteResultAsync(ActionContext context)
+        {
+            var actionResult = FormatActionResult(context);
+
+            return actionResult.ExecuteResultAsync(context);
         }
 
         public static implicit operator FCPActionResult<TResultData>(FCPDoResult<TResultData> doResult)

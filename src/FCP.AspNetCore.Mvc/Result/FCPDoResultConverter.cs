@@ -11,15 +11,14 @@ namespace Microsoft.AspNetCore.Mvc
     {
         private static readonly IDictionary<string, FCPDoResultConverter> converterDic =
             new Dictionary<string, FCPDoResultConverter>()
-        {
-            { FCPDoResultType.success.ToString(), new FCPDoResultSuccessConverter() },
-            { FCPDoResultType.fail.ToString(), new FCPDoResultFailConverter() },
-            { FCPDoResultType.validFail.ToString(), new FCPDoResultValidFailConverter() },
-            { FCPDoResultType.notFound.ToString(), new FCPDoResultNotFoundConverter() },
-            { FCPDoResultType.unauthorized.ToString(), new FCPDoResultUnauthorizedConverter() }
-        };
+            {
+                { FCPDoResultType.success.ToString(), new FCPDoResultSuccessConverter() },
+                { FCPDoResultType.fail.ToString(), new FCPDoResultFailConverter() },
+                { FCPDoResultType.validFail.ToString(), new FCPDoResultValidFailConverter() },
+                { FCPDoResultType.notFound.ToString(), new FCPDoResultNotFoundConverter() }            
+            };
 
-        internal abstract ActionResult Convert<T>(FCPDoResult<T> doResult);
+        internal abstract IActionResult Convert<T>(FCPDoResult<T> doResult);
 
         internal static FCPDoResultConverter GetConverter<T>(FCPDoResult<T> doResult)
         {
@@ -34,7 +33,7 @@ namespace Microsoft.AspNetCore.Mvc
         /// </summary>
         private class FCPDoResultSuccessConverter : FCPDoResultConverter
         {
-            internal override ActionResult Convert<T>(FCPDoResult<T> doResult)
+            internal override IActionResult Convert<T>(FCPDoResult<T> doResult)
             {
                 return new OkObjectResult(doResult.data);
             }
@@ -45,7 +44,7 @@ namespace Microsoft.AspNetCore.Mvc
         /// </summary>
         private class FCPDoResultFailConverter : FCPDoResultConverter
         {
-            internal override ActionResult Convert<T>(FCPDoResult<T> doResult)
+            internal override IActionResult Convert<T>(FCPDoResult<T> doResult)
             {
                 return new ObjectResult(doResult.msg)
                 {
@@ -59,7 +58,7 @@ namespace Microsoft.AspNetCore.Mvc
         /// </summary>
         private class FCPDoResultValidFailConverter : FCPDoResultConverter
         {
-            internal override ActionResult Convert<T>(FCPDoResult<T> doResult)
+            internal override IActionResult Convert<T>(FCPDoResult<T> doResult)
             {
                 var modelStateDict = new ModelStateDictionary();
                 if (doResult.validFailResults.isNotEmpty())
@@ -79,23 +78,9 @@ namespace Microsoft.AspNetCore.Mvc
         /// </summary>
         private class FCPDoResultNotFoundConverter : FCPDoResultConverter
         {
-            internal override ActionResult Convert<T>(FCPDoResult<T> doResult)
+            internal override IActionResult Convert<T>(FCPDoResult<T> doResult)
             {
                 return new NotFoundObjectResult(doResult.msg);
-            }
-        }
-
-        /// <summary>
-        /// Unauthorized Converter
-        /// </summary>
-        private class FCPDoResultUnauthorizedConverter : FCPDoResultConverter
-        {
-            internal override ActionResult Convert<T>(FCPDoResult<T> doResult)
-            {
-                return new ObjectResult(doResult.msg)
-                {
-                    StatusCode = StatusCodes.Status401Unauthorized
-                };
             }
         }
     }
