@@ -10,7 +10,7 @@ namespace Microsoft.AspNetCore.Mvc
 
         protected override IActionResult FormatActionResult(ActionContext context)
         {
-            return base.FormatActionResult(context);
+            return DoResult.ToActionResult(context, FCPActionResultType.noContent);
         }
 
         public static implicit operator FCPNoContentActionResult<TResultData>(FCPDoResult<TResultData> doResult)

@@ -1,4 +1,5 @@
 ﻿using FCP.Core;
+using System.Collections.Generic;
 
 namespace Microsoft.AspNetCore.Mvc
 {
@@ -11,12 +12,22 @@ namespace Microsoft.AspNetCore.Mvc
 
         protected override IActionResult FormatActionResult(ActionContext context)
         {
+            if (DoResult.isSuc)
+            {
+
+            }
+
             return base.FormatActionResult(context);
         }
 
         public static implicit operator FCPPagingActionResult<TResultData>(FCPDoResult<FCPPageData<TResultData>> doResult)
         {
             return new FCPPagingActionResult<TResultData>(doResult);
+        }
+
+        public static implicit operator FCPPagingActionResult<TResultData>(FCPDoResult<IList<TResultData>> doResult)
+        {
+            return new FCPPagingActionResult<TResultData>(doResult.AsPaging());
         }
     }
 }

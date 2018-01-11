@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using FCP.Core;
+﻿using FCP.Core;
 
 namespace Microsoft.AspNetCore.Mvc
 {
@@ -11,7 +10,7 @@ namespace Microsoft.AspNetCore.Mvc
 
         protected override IActionResult FormatActionResult(ActionContext context)
         {
-            return base.FormatActionResult(context);
+            return DoResult.ToActionResult(context, FCPActionResultType.created);
         }
 
         public static implicit operator FCPCreatedActionResult<TKey>(FCPDoResult<TKey> doResult)

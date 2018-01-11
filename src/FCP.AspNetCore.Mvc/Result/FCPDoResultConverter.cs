@@ -1,31 +1,43 @@
 ﻿using FCP.Core;
 using FCP.Util;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using System;
-using System.Collections.Generic;
 
 namespace Microsoft.AspNetCore.Mvc
 {
     internal abstract class FCPDoResultConverter
     {
-        private static readonly IDictionary<string, FCPDoResultConverter> converterDic =
-            new Dictionary<string, FCPDoResultConverter>()
-            {
-                { FCPDoResultType.success.ToString(), new FCPDoResultSuccessConverter() },
-                { FCPDoResultType.fail.ToString(), new FCPDoResultFailConverter() },
-                { FCPDoResultType.validFail.ToString(), new FCPDoResultValidFailConverter() },
-                { FCPDoResultType.notFound.ToString(), new FCPDoResultNotFoundConverter() }            
-            };
+        private static readonly FCPDoResultConverter[] Converters = new FCPDoResultConverter[]
+        {
+            new FCPDoResultSuccessConverter(),
+            new FCPDoResultFailConverter(),
+            new FCPDoResultValidFailConverter(),
+            new FCPDoResultNotFoundConverter(),
 
-        internal abstract IActionResult Convert<T>(FCPDoResult<T> doResult);
+            new FCPDoResultCreatedConverter(),
+            new FCPDoResultNoContentConverter()
+        };
 
-        internal static FCPDoResultConverter GetConverter<T>(FCPDoResult<T> doResult)
+        internal abstract IActionResult Convert<T>(FCPDoResult<T> doResult, ActionContext context);
+
+        protected abstract bool CanConvert<T>(FCPDoResult<T> doResult, FCPActionResultType resultType);
+
+        internal static FCPDoResultConverter GetConverter<T>(FCPDoResult<T> doResult, FCPActionResultType resultType)
         {
             if (doResult == null)
                 throw new ArgumentNullException(nameof(doResult));
 
-            return converterDic[doResult.type];
+            foreach(var converter in Converters)
+            {
+                if (converter.CanConvert(doResult, resultType))
+                {
+                    return converter;
+                }
+            }
+
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -33,10 +45,13 @@ namespace Microsoft.AspNetCore.Mvc
         /// </summary>
         private class FCPDoResultSuccessConverter : FCPDoResultConverter
         {
-            internal override IActionResult Convert<T>(FCPDoResult<T> doResult)
+            internal override IActionResult Convert<T>(FCPDoResult<T> doResult, ActionContext context)
             {
                 return new OkObjectResult(doResult.data);
             }
+
+            protected override bool CanConvert<T>(FCPDoResult<T> doResult, FCPActionResultType resultType)
+                => doResult.isSuc && resultType == FCPActionResultType.none;
         }
 
         /// <summary>
@@ -44,13 +59,16 @@ namespace Microsoft.AspNetCore.Mvc
         /// </summary>
         private class FCPDoResultFailConverter : FCPDoResultConverter
         {
-            internal override IActionResult Convert<T>(FCPDoResult<T> doResult)
+            internal override IActionResult Convert<T>(FCPDoResult<T> doResult, ActionContext context)
             {
                 return new ObjectResult(doResult.msg)
                 {
                     StatusCode = StatusCodes.Status500InternalServerError
                 };
             }
+
+            protected override bool CanConvert<T>(FCPDoResult<T> doResult, FCPActionResultType resultType)
+                => doResult.type == FCPDoResultType.fail.ToString();
         }
 
         /// <summary>
@@ -58,7 +76,7 @@ namespace Microsoft.AspNetCore.Mvc
         /// </summary>
         private class FCPDoResultValidFailConverter : FCPDoResultConverter
         {
-            internal override IActionResult Convert<T>(FCPDoResult<T> doResult)
+            internal override IActionResult Convert<T>(FCPDoResult<T> doResult, ActionContext context)
             {
                 var modelStateDict = new ModelStateDictionary();
                 if (doResult.validFailResults.isNotEmpty())
@@ -71,6 +89,9 @@ namespace Microsoft.AspNetCore.Mvc
 
                 return new BadRequestObjectResult(modelStateDict);
             }
+
+            protected override bool CanConvert<T>(FCPDoResult<T> doResult, FCPActionResultType resultType)
+                => doResult.isValidFail;
         }
 
         /// <summary>
@@ -78,10 +99,42 @@ namespace Microsoft.AspNetCore.Mvc
         /// </summary>
         private class FCPDoResultNotFoundConverter : FCPDoResultConverter
         {
-            internal override IActionResult Convert<T>(FCPDoResult<T> doResult)
+            internal override IActionResult Convert<T>(FCPDoResult<T> doResult, ActionContext context)
             {
                 return new NotFoundObjectResult(doResult.msg);
             }
+
+            protected override bool CanConvert<T>(FCPDoResult<T> doResult, FCPActionResultType resultType)
+                => doResult.type == FCPDoResultType.notFound.ToString();
+        }
+
+        /// <summary>
+        /// Created Converter
+        /// </summary>
+        private class FCPDoResultCreatedConverter : FCPDoResultConverter
+        {
+            internal override IActionResult Convert<T>(FCPDoResult<T> doResult, ActionContext context)
+            {
+                var location = $"{UriHelper.GetEncodedUrl(context.HttpContext.Request)}/{doResult.data}";
+                return new CreatedResult(location, doResult.data);
+            }
+
+            protected override bool CanConvert<T>(FCPDoResult<T> doResult, FCPActionResultType resultType)
+                => doResult.isSuc && resultType == FCPActionResultType.created;
+        }
+
+        /// <summary>
+        /// NoContent Converter
+        /// </summary>
+        private class FCPDoResultNoContentConverter : FCPDoResultConverter
+        {
+            internal override IActionResult Convert<T>(FCPDoResult<T> doResult, ActionContext context)
+            {                
+                return new NoContentResult();
+            }
+
+            protected override bool CanConvert<T>(FCPDoResult<T> doResult, FCPActionResultType resultType)
+                => doResult.isSuc && resultType == FCPActionResultType.noContent;
         }
     }
 }

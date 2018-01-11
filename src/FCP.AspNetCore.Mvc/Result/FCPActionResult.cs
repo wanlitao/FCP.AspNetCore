@@ -15,7 +15,7 @@ namespace Microsoft.AspNetCore.Mvc
 
         protected virtual IActionResult FormatActionResult(ActionContext context)
         {
-            return DoResult.ToActionResult();
+            return DoResult.ToActionResult(context);
         }
 
         public virtual Task ExecuteResultAsync(ActionContext context)
