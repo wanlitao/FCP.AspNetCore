@@ -11,7 +11,26 @@ namespace Microsoft.AspNetCore.Mvc
             return ToActionResult(doResult, context, FCPActionResultType.none);
         }
 
-        internal static IActionResult ToActionResult<T>(this FCPDoResult<T> doResult, ActionContext context, FCPActionResultType resultType)
+        internal static IActionResult ToActionResult<T>(this FCPDoResult<T> doResult,
+            ActionContext context, FCPActionResultType resultType)
+        {
+            if (doResult == null)
+                throw new ArgumentNullException(nameof(doResult));
+
+            if (context == null)
+                throw new ArgumentNullException(nameof(context));
+
+            return FCPDoResultConverter.GetConverter(doResult, resultType).Convert(doResult, context);
+        }
+
+        internal static IActionResult ToActionResult<T>(this FCPDoResult<FCPPageData<T>> doResult,
+            ActionContext context) where T : class
+        {
+            return ToActionResult(doResult, context, FCPActionResultType.none);
+        }
+
+        internal static IActionResult ToActionResult<T>(this FCPDoResult<FCPPageData<T>> doResult,
+            ActionContext context, FCPActionResultType resultType) where T : class
         {
             if (doResult == null)
                 throw new ArgumentNullException(nameof(doResult));

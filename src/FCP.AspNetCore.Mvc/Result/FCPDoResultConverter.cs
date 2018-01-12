@@ -22,6 +22,8 @@ namespace Microsoft.AspNetCore.Mvc
 
         internal abstract IActionResult Convert<T>(FCPDoResult<T> doResult, ActionContext context);
 
+        internal abstract IActionResult Convert<T>(FCPDoResult<FCPPageData<T>> doResult, ActionContext context) where T : class;
+
         protected abstract bool CanConvert<T>(FCPDoResult<T> doResult, FCPActionResultType resultType);
 
         internal static FCPDoResultConverter GetConverter<T>(FCPDoResult<T> doResult, FCPActionResultType resultType)
@@ -50,6 +52,11 @@ namespace Microsoft.AspNetCore.Mvc
                 return new OkObjectResult(doResult.data);
             }
 
+            internal override IActionResult Convert<T>(FCPDoResult<FCPPageData<T>> doResult, ActionContext context)
+            {
+                return new OkPagingResult(doResult.data.data);
+            }
+
             protected override bool CanConvert<T>(FCPDoResult<T> doResult, FCPActionResultType resultType)
                 => doResult.isSuc && resultType == FCPActionResultType.none;
         }
@@ -65,6 +72,11 @@ namespace Microsoft.AspNetCore.Mvc
                 {
                     StatusCode = StatusCodes.Status500InternalServerError
                 };
+            }
+
+            internal override IActionResult Convert<T>(FCPDoResult<FCPPageData<T>> doResult, ActionContext context)
+            {
+                return Convert<FCPPageData<T>>(doResult, context);
             }
 
             protected override bool CanConvert<T>(FCPDoResult<T> doResult, FCPActionResultType resultType)
@@ -90,6 +102,11 @@ namespace Microsoft.AspNetCore.Mvc
                 return new BadRequestObjectResult(modelStateDict);
             }
 
+            internal override IActionResult Convert<T>(FCPDoResult<FCPPageData<T>> doResult, ActionContext context)
+            {
+                return Convert<FCPPageData<T>>(doResult, context);
+            }
+
             protected override bool CanConvert<T>(FCPDoResult<T> doResult, FCPActionResultType resultType)
                 => doResult.isValidFail;
         }
@@ -102,6 +119,11 @@ namespace Microsoft.AspNetCore.Mvc
             internal override IActionResult Convert<T>(FCPDoResult<T> doResult, ActionContext context)
             {
                 return new NotFoundObjectResult(doResult.msg);
+            }
+
+            internal override IActionResult Convert<T>(FCPDoResult<FCPPageData<T>> doResult, ActionContext context)
+            {
+                return Convert<FCPPageData<T>>(doResult, context);
             }
 
             protected override bool CanConvert<T>(FCPDoResult<T> doResult, FCPActionResultType resultType)
@@ -119,6 +141,11 @@ namespace Microsoft.AspNetCore.Mvc
                 return new CreatedResult(location, doResult.data);
             }
 
+            internal override IActionResult Convert<T>(FCPDoResult<FCPPageData<T>> doResult, ActionContext context)
+            {
+                throw new NotImplementedException();
+            }
+
             protected override bool CanConvert<T>(FCPDoResult<T> doResult, FCPActionResultType resultType)
                 => doResult.isSuc && resultType == FCPActionResultType.created;
         }
@@ -131,6 +158,11 @@ namespace Microsoft.AspNetCore.Mvc
             internal override IActionResult Convert<T>(FCPDoResult<T> doResult, ActionContext context)
             {                
                 return new NoContentResult();
+            }
+
+            internal override IActionResult Convert<T>(FCPDoResult<FCPPageData<T>> doResult, ActionContext context)
+            {
+                throw new NotImplementedException();
             }
 
             protected override bool CanConvert<T>(FCPDoResult<T> doResult, FCPActionResultType resultType)

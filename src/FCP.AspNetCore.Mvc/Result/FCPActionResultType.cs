@@ -13,10 +13,6 @@
         /// <summary>
         /// 204 NoContent
         /// </summary>
-        noContent,
-        /// <summary>
-        /// with paging link header
-        /// </summary>
-        paging
+        noContent        
     }
 }
