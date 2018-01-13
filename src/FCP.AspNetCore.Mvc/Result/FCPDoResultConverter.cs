@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using System;
+using System.Linq;
 
 namespace Microsoft.AspNetCore.Mvc
 {
@@ -54,7 +55,7 @@ namespace Microsoft.AspNetCore.Mvc
 
             internal override IActionResult Convert<T>(FCPDoResult<FCPPageData<T>> doResult, ActionContext context)
             {
-                return new OkPagingResult(doResult.data.data);
+                return new OkPagingResult(doResult.data.data, doResult.BuildPagingLinks(context).ToArray());
             }
 
             protected override bool CanConvert<T>(FCPDoResult<T> doResult, FCPActionResultType resultType)
