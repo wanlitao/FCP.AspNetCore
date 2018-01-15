@@ -10,6 +10,11 @@ namespace Microsoft.AspNetCore.Mvc
             : base(doResult)
         { }
 
+        protected override IActionResult FormatActionResult(ActionContext context)
+        {
+            return DoResult.ToActionResult(context);
+        }
+
         public static implicit operator FCPPagingActionResult<TResultData>(FCPDoResult<FCPPageData<TResultData>> doResult)
         {
             return new FCPPagingActionResult<TResultData>(doResult);
