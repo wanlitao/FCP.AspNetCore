@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
 
@@ -15,14 +16,13 @@ namespace Microsoft.AspNetCore.Http
 
         public Task Invoke(HttpContext context /* other scoped dependencies */)
         {
-            try
+            var ex = context.Features.Get<IExceptionHandlerFeature>();
+            if (ex != null)
             {
-                return _next(context);
+                return HandleExceptionAsync(context, ex.Error);
             }
-            catch (Exception ex)
-            {
-                return HandleExceptionAsync(context, ex);
-            }
+
+            return _next(context);
         }
 
         protected virtual Task HandleExceptionAsync(HttpContext context, Exception exception)
