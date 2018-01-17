@@ -55,7 +55,7 @@ namespace Microsoft.AspNetCore.Mvc
 
             internal override IActionResult Convert<T>(FCPDoResult<FCPPageData<T>> doResult, ActionContext context)
             {
-                return new OkPagingResult(doResult.data.data, doResult.BuildPagingLinks(context).ToArray());
+                return new OkPagingResult(doResult.data.data, doResult.data.total, doResult.BuildPagingLinks(context).ToArray());
             }
 
             protected override bool CanConvert<T>(FCPDoResult<T> doResult, FCPActionResultType resultType)
@@ -69,7 +69,7 @@ namespace Microsoft.AspNetCore.Mvc
         {
             internal override IActionResult Convert<T>(FCPDoResult<T> doResult, ActionContext context)
             {
-                return new ObjectResult(doResult.msg)
+                return new ObjectResult(new ErrorResponse(doResult.msg))
                 {
                     StatusCode = StatusCodes.Status500InternalServerError
                 };
@@ -100,7 +100,7 @@ namespace Microsoft.AspNetCore.Mvc
                     }
                 }
 
-                return new BadRequestObjectResult(modelStateDict);
+                return new BadRequestObjectResult(new ErrorResponse(modelStateDict));
             }
 
             internal override IActionResult Convert<T>(FCPDoResult<FCPPageData<T>> doResult, ActionContext context)
@@ -119,7 +119,7 @@ namespace Microsoft.AspNetCore.Mvc
         {
             internal override IActionResult Convert<T>(FCPDoResult<T> doResult, ActionContext context)
             {
-                return new NotFoundObjectResult(doResult.msg);
+                return new NotFoundObjectResult(new ErrorResponse(doResult.msg));
             }
 
             internal override IActionResult Convert<T>(FCPDoResult<FCPPageData<T>> doResult, ActionContext context)
