@@ -16,7 +16,7 @@
 
   <ItemGroup>
     <PackageReference Include="FCP.Core" Version="1.1.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.Abstractions" Version="2.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Diagnostics" Version="2.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.0.1" />
   </ItemGroup>
 
