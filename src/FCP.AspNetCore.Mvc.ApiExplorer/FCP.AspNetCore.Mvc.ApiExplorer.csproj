@@ -2,11 +2,11 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Version>1.0.5</Version>
-    <AssemblyVersion>1.0.5.0</AssemblyVersion>
-    <FileVersion>1.0.5.0</FileVersion>
+    <Version>1.0.0</Version>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
     <Authors>wanlitao</Authors>
-    <Description>AspNetCore Mvc Extensions for FCP(Fluent Compute Platform)</Description>
+    <Description>AspNetCore Mvc ApiExplorer Extensions for FCP(Fluent Compute Platform)</Description>
     <Company>GreatBillows</Company>
     <Copyright>Copyright © GreatBillows 2017</Copyright>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
@@ -15,9 +15,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FCP.Core" Version="1.1.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Diagnostics" Version="2.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FCP.AspNetCore.Mvc\FCP.AspNetCore.Mvc.csproj" />
   </ItemGroup>
 
 </Project>
